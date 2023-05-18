@@ -19,7 +19,7 @@ const createBitGetter = (array) => {
 	}
 
 	const resetBit = (arrayIndex, bitIndex) => {
-		array[arrayIndex] = arrayIndex[arrayIndex] & ~(1 << bitIndex);
+		array[arrayIndex] = array[arrayIndex] & ~(1 << bitIndex);
 	}
 
 	return {
