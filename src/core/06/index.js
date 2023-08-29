@@ -192,6 +192,39 @@ class HashMap {
 	}
 }
 
+class Matrix3D {
+	constructor(dimensions) {
+		this.matrix = {};
+		this.dimensions = dimensions;
+	}
+	validateCoordinates(coords) {
+		if (
+			coords.x < 0 || coords.x >= this.dimensions.x ||
+			coords.y < 0 || coords.y >= this.dimensions.y ||
+			coords.z < 0 || coords.z >= this.dimensions.z
+		) {
+			throw new Error("Invalid coordinates");
+		}
+	}
+	getIndex(coords) {
+		return coords.x + coords.y * this.dimensions.x + coords.z * this.dimensions.x * this.dimensions.y;
+	}
+	set(coords, value) {
+		this.validateCoordinates(coords);
+		const index = this.getIndex(coords);
+		this.matrix[index] = value;
+	}
+	get(coords) {
+		this.validateCoordinates(coords);
+		const index = this.getIndex(coords);
+		return this.matrix[index];
+	}
+}
+
+const matrix = new Matrix3D({ x: 10, y: 10, z: 10 });
+matrix.set({ x: 1, y: 3, z: 2 }, 10);
+console.log(matrix.get({ x: 1, y: 3, z: 2 }), '3DMatrix'); // Output: 10
+
 const map = new HashMap(120);
 const obj = {a : 1};
 map.set('foo', 1);
