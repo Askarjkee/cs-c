@@ -47,7 +47,6 @@ console.log(bisecRight([1, 2, 3, 4, 5, 6, 7, 7, 7, 7, 8, 9], (el) => el - 7)); /
 
 
 class BinaryNode {
-
 	constructor(value, {parent, left, right}) {
 		this.value = value;
 		this.parent = parent ?? null;
@@ -59,6 +58,41 @@ class BinaryNode {
 class BinaryTree {
 	constructor(value, {left, right}) {
 		this.root = new BinaryNode(value, {left, right})
+	}
+	add(value) {
+		function findPos(node) {
+			if (value > node.value) {
+				if (node.right === null) {
+					const parent = node;
+					const newNode = new BinaryNode(value, {parent})
+					node.right = newNode;
+					return;
+				}
+				return findPos(node.right)
+			} else {
+				if (node.left === null) {
+					const parent = node;
+					const newNode = new BinaryNode(value, {parent})
+					node.left = newNode;
+					return;
+				}
+				return findPos(node.left)
+			}
+		}
+		findPos(this.root)
+	}
+	depth(cb) {
+		const visited = new Set();
+		function depthRecursion(node) {
+			if (!node || visited.has(node)) {
+				return;
+			}
+			visited.add(node);
+			cb(node);
+			depthRecursion(node.left);
+			depthRecursion(node.right);
+		}
+		depthRecursion(this.root);
 	}
 	min() {
 		let min = this.root.value;
@@ -90,7 +124,39 @@ class BinaryTree {
 		findMax(this.root);
 		return max;
 	}
-
+	delete(val) {
+		const nodeToRemove = this.find(val);
+		if (nodeToRemove) {
+			const { parent, left, right } = nodeToRemove;
+			if (!left && !right) {
+				if (parent) {
+					if (parent.left === nodeToRemove) {
+						parent.left = null;
+					} else {
+						parent.right = null;
+					}
+				} else {
+					this.root = null;
+				}
+			} else if (left && right) {
+				const successor = this.min(nodeToRemove.right);
+				nodeToRemove.value = successor.value;
+				this.delete(successor.value);
+			} else {
+				const childNode = left || right;
+				if (parent) {
+					if (parent.left === nodeToRemove) {
+						parent.left = childNode;
+					} else {
+						parent.right = childNode;
+					}
+				} else {
+					this.root = childNode;
+					childNode.parent = null;
+				}
+			}
+		}
+	}
 	find(value) {
 		function findNode(node) {
 			if (node === null) return null;
@@ -107,34 +173,11 @@ class BinaryTree {
 	}
 }
 
-const tree = new BinaryTree(10, {
-	parent: null,
-	left: new BinaryNode(7, {
-		parent: null,
-		left: new BinaryNode(3, {
-			parent: null,
-			left: null,
-			right: null,
-		}),
-		right: new BinaryNode(8, {
-			parent: null,
-			left: null,
-			right: null,
-		}),
-	}),
-	right: new BinaryNode(15, {
-		parent: null,
-		left: new BinaryNode(13, {
-			parent: null,
-			left: null,
-			right: null,
-		}),
-		right: new BinaryNode(18, {
-			parent: null,
-			left: null,
-			right: null,
-		}),
-	})
-})
+const tree = new BinaryTree(10, {})
 
-console.log(tree.max())
+console.log(tree.add(1))
+console.log(tree.add(2))
+console.log(tree.add(3))
+console.log(tree.add(4))
+console.log(tree.delete(10))
+tree.depth(console.log)
