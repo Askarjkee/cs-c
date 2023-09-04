@@ -54,7 +54,7 @@ class BinaryNode {
 		this.right = right ?? null;
 	}
 }
-
+// TODO depth with queue & delete node and right
 class BinaryTree {
 	constructor(value, {left, right}) {
 		this.root = new BinaryNode(value, {left, right})
