@@ -63,7 +63,6 @@ class OrderedQueue {
 			this.#buffer[cursor] = parent;
 			cursor = parentIndex;
 		}
-		console.log(value, 'value finally')
 		this.#buffer[cursor] = value;
 	}
  // TODO THIS
@@ -104,7 +103,19 @@ class OrderedQueue {
 	}
 }
 
-const queue = new OrderedQueue((a,b) => b - a);
+function heapSort(array) {
+	const queue = new OrderedQueue((a,b) => a - b);
+	for (const value of array) {
+		queue.push(value)
+	}
+	for (let i = array.length - 1; i >= 0; i--) {
+		const value = queue.pop();
+		array[i] = value;
+	}
+	return array;
+}
+
+const queue = new OrderedQueue((a,b) => a - b);
 
 queue.push(1)
 queue.push(10)
@@ -112,3 +123,5 @@ queue.push(5)
 queue.push(16)
 console.log(queue.head, 'head')
 queue.pop();
+
+console.log(heapSort([3,4,5,6,7,9]))
