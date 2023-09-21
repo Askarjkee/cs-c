@@ -1,4 +1,4 @@
-class TrieNode {
+class Node {
 	constructor() {
 		this.children = {};
 		this.isEnd = false;
@@ -7,18 +7,18 @@ class TrieNode {
 
 class Trie {
 	constructor() {
-		this.root = new TrieNode()
+		this.root = new Node();
 	}
 
 	addWord(word) {
-		let node = this.root
-		for (const char of word) {
-			if (!node.children[char]) {
-				node.children[char] = new TrieNode();
+		let current = this.root;
+			for (const char of word) {
+				if (!current.children[char]) {
+					current.children[char] = new Node();
+				}
+				current = current.children[char];
 			}
-			node = node.children[char];
-		}
-		node.isEnd = true;
+			current.isEnd = true;
 	}
 
 	go(char) {
@@ -33,7 +33,8 @@ class TrieTraversal {
 	}
 
 	isWord() {
-		return this.currentNode ? this.currentNode.isEnd : false;
+		const node = this.currentNode;
+		return node ? node.isEnd : false;
 	}
 
 	go(char) {
@@ -42,6 +43,7 @@ class TrieTraversal {
 	}
 }
 
+
 const trie = new Trie();
 
 trie.addWord('мясо');
@@ -49,5 +51,4 @@ trie.addWord('мясорубка');
 trie.addWord('мир');
 
 console.log(trie.go('м').go('я').go('с').go('о').isWord()); // true
-console.log(trie.go('м').go('я').go('с').go('о').go('р').isWord()); // false
-console.log(trie.go('м').go('я').go('с').go('о').go('р').go('у').go('б').go('к').go('а').isWord()); // true
+console.log(trie.go('м').go('и').isWord()); // true
