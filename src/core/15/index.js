@@ -150,10 +150,41 @@ function seq (...args) {
 	}
 }
 
+function zip(...iterables) {
+	const iterators = [];
+	const result = [];
+	let cursor = 0;
+	for (let i = 0; i < iterables.length; i++) {
+		iterators.push(iterables[i][Symbol.iterator]())
+	}
+	while (true) {
+		const nextValues = iterators.map(iterator => iterator.next());
+		if (nextValues.some(({ done }) => done)) {
+			break;
+		}
+		const tuple = nextValues.map(({ value }) => value);
+		result.push(tuple);
+	}
+
+	return {
+		[Symbol.iterator]() {
+			return this;
+		},
+		next: () => {
+			const temp = {
+				value: result[cursor],
+				done: cursor >= result.length
+			}
+			cursor++;
+			return temp;
+		}
+	}
+}
 
 
 
-console.log([1,2,3].values())
+const bla = zip([1, 2], new Set([3, 4]), 'bl');
+console.log([...zip([1, 2], new Set([3, 4]), 'bl')]); // [[1, 3, b], [2, 4, 'l']]
 
 const randomInt = random(1, 100);
 
