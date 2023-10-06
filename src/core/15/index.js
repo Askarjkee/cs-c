@@ -150,30 +150,41 @@ function seq (...args) {
 	}
 }
 
+function isIterable(obj) {
+	return obj != null && typeof obj[Symbol.iterator] === 'function';
+}
+
 function zip(...iterables) {
-	const iterators = [];
-	const result = [];
-	let cursor = 0;
-	for (let i = 0; i < iterables.length; i++) {
-		iterators.push(iterables[i][Symbol.iterator]())
-	}
-	while (true) {
-		const nextValues = iterators.map(iterator => iterator.next());
-		if (nextValues.some(({ done }) => done)) {
-			break;
-		}
-		const tuple = nextValues.map(({ value }) => value);
-		result.push(tuple);
-	}
+	const iters = iterables.map((iter) => iter[Symbol.iterator]());
 
 	return {
 		[Symbol.iterator]() {
 			return this;
 		},
 		next: () => {
+			const nextValues = iters.map((iter) => iter.next());
+			return {
+				value: nextValues.map(({value}) => value),
+				done: nextValues.every(({done}) => done),
+			}
+		}
+	}
+}
+
+function mapSeq(iterable, iterableCb) {
+	let cursor = 0;
+	return {
+		[Symbol.iterator]() {
+			return this;
+		},
+		next: () => {
+			let result = iterable[cursor];
+			for (const cb of iterableCb) {
+				result = cb(result)
+			}
 			const temp = {
-				value: result[cursor],
-				done: cursor >= result.length
+				value: result,
+				done: cursor >= iterable.length,
 			}
 			cursor++;
 			return temp;
@@ -182,20 +193,6 @@ function zip(...iterables) {
 }
 
 
-
-const bla = zip([1, 2], new Set([3, 4]), 'bl');
-console.log([...zip([1, 2], new Set([3, 4]), 'bl')]); // [[1, 3, b], [2, 4, 'l']]
-
-const randomInt = random(1, 100);
-
-const symbolRange = new Range('a', 'f');
-const numberRange = new Range(-5, 1);
-
-// console.log(Array.from(numberRange.reverse()));
-// console.log(Array.from(symbolRange)); // ['a', 'b', 'c', 'd', 'e', 'f']
-console.log(...seq([1, 2], new Set([3, 4]), 'bla')); // 1, 2, 3, 4, 'b', 'l', 'a'
-
-// console.log([...take(enumerate(randomInt), 3)]); // [[0, ...], [1, ...], [2, ...]]
-
+console.log(...mapSeq([1, 2, 3], [(el) => el * 2, (el) => el - 1])); // [1, 3, 5]
 
 
