@@ -34,18 +34,19 @@ function take(iter, limit) {
 }
 
 function filter(iter, predicate) {
+	const iterable = iter[Symbol.iterator]();
 	return {
 		[Symbol.iterator]() {
 			return this;
 		},
 		next: () => {
-			const obj = iter[Symbol.iterator]().next();
-			if (predicate(obj.value)) {
-				return obj;
-			}
-			return {
-				value: undefined,
-				done: true
+			let chunk = iterable.next();
+
+			while (true) {
+				if (predicate(chunk.value) || chunk.done) {
+					return chunk;
+				}
+				chunk = iterable.next()
 			}
 		}
 	}
@@ -150,10 +151,6 @@ function seq (...args) {
 	}
 }
 
-function isIterable(obj) {
-	return obj != null && typeof obj[Symbol.iterator] === 'function';
-}
-
 function zip(...iterables) {
 	const iters = iterables.map((iter) => iter[Symbol.iterator]());
 
@@ -172,27 +169,23 @@ function zip(...iterables) {
 }
 
 function mapSeq(iterable, iterableCb) {
-	let cursor = 0;
+	const iter = iterable[Symbol.iterator]();
 	return {
 		[Symbol.iterator]() {
 			return this;
 		},
 		next: () => {
-			let result = iterable[cursor];
+			let result = iter.next();
 			for (const cb of iterableCb) {
-				result = cb(result)
+				result.value = cb(result.value)
 			}
-			const temp = {
-				value: result,
-				done: cursor >= iterable.length,
-			}
-			cursor++;
-			return temp;
+			return result;
 		}
 	}
 }
 
-
+const randomInt = random(0, 100);
+console.log([...take(filter(randomInt, (el) => el > 30), 15)], 'hey');
 console.log(...mapSeq([1, 2, 3], [(el) => el * 2, (el) => el - 1])); // [1, 3, 5]
 
 
