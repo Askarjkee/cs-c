@@ -184,8 +184,32 @@ function mapSeq(iterable, iterableCb) {
 	}
 }
 
+function skip (iterable, skipCount) {
+	const iter = iterable[Symbol.iterator]();
+	let count = 0;
+	return {
+		[Symbol.iterator]() {
+			return this;
+		},
+		next: () => {
+			let chunk = iter.next();
+			while (true) {
+				if (count >= skipCount || chunk.done) {
+					return chunk;
+				}
+				chunk = iter.next();
+				count += 1;
+			}
+		}
+	}
+}
+
 const randomInt = random(0, 100);
-console.log([...take(filter(randomInt, (el) => el > 30), 15)], 'hey');
-console.log(...mapSeq([1, 2, 3], [(el) => el * 2, (el) => el - 1])); // [1, 3, 5]
+const iter = [1,2,3,4,5].values();
+
+console.log(...skip([1,2,3,4,5], 2))
+console.log(filter(iter, (el) => el > 3).next());
+console.log(filter(iter, (el) => el > 3).next());
+
 
 
