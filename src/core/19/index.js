@@ -25,7 +25,6 @@ class Result {
 		if (this.state === 'error') {
 			callback(this.error)
 		}
-		return this;
 	}
 }
 
@@ -38,5 +37,7 @@ res1.then((data) => {
 const res2 = new Result(() => { throw 'Boom!'; });
 
 res2
-	.then((data) => {console.log('bla');})
+	.then((data) => {
+	console.log('bla');
+	})
 	.catch((e) => console.error(e));
