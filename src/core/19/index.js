@@ -46,13 +46,9 @@ function exec(generator) {
 
 		const result = iteration.value;
 
-		if (result instanceof Result) {
-			result
-				.then(value => iterate(iterator.next(handleResult(value))))
-				.catch(error => iterate(iterator.throw(error)))
-		} else {
-			iterate(iterator.next(handleResult(result)));
-		}
+		result
+			.then(value => iterate(iterator.next(handleResult(value))))
+			.catch(error => iterate(iterator.throw(error)))
 	}
 
 	iterate(iterator.next());
