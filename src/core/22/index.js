@@ -121,4 +121,3 @@ SyncPromise
 	.catch((e) => console.error('err', e))
 SyncPromise.resolve(1).then(console.log).catch(console.error); // 1
 console.log(2);                           // 2
-
