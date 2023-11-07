@@ -1,5 +1,16 @@
-const events = require('events');
+import events from 'events';
+import { seq } from './seq.js';
+import { take } from './take.js';
+import { filter } from './filter.js';
+
 const em = new events.EventEmitter();
+
+async function* once(emitter, event) {
+	for await (let result of on(emitter, event)) {
+		yield result;
+		return;
+	}
+}
 
 function on(emitter, event) {
 	const handlers = new Set();
@@ -35,7 +46,7 @@ function on(emitter, event) {
 }
 
 (async () => {
-	for await (const event of on(em, 'foo')) {
+	for await (const event of seq(once(em, 'bar'), filter(take(on(em, 'foo'), 10), (value) => value > 200))) {
 		console.log(event);
 	}
 })();
@@ -43,5 +54,9 @@ function on(emitter, event) {
 em.emit('foo', 123);
 em.emit('foo', 456);
 em.emit('foo', 789);
-em.emit('foo', 1111);
+em.emit('foo', 123);
+em.emit('foo', 456);
+em.emit('foo', 789);
+em.emit('bar', 1111);
+em.emit('bar', 1111);
 

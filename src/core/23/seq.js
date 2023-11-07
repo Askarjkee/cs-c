@@ -14,7 +14,7 @@ export function seq(...iterators) {
 					return new Promise((resolve) => resolve({done: true, value: current.value}));
 				} else {
 					index += 1;
-					currentIter = iterators[index][Symbol].asyncIterator();
+					currentIter = iterators[index][Symbol.asyncIterator]();
 					current = await currentIter.next();
 					return current;
 				}
@@ -24,3 +24,4 @@ export function seq(...iterators) {
 		}
 	}
 }
+
