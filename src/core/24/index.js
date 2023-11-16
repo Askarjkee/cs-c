@@ -102,3 +102,80 @@ semaphore('bar')
 	.then(console.log);
 
 
+class RWLock {
+	constructor(initialValue) {
+		this.value = initialValue;
+		this.readers = 0;
+		this.writers = 0;
+	}
+
+	get() {
+		if (this.writers > 0) {
+			throw new Error('Already locked writers bigger than 0');
+		}
+
+		this.readers++;
+
+		const proxy = new Proxy(this, {
+			set: function (target, key, value) {
+				throw new Error('Cannot modify while reading')
+			}
+		});
+		const free = () => {
+			this.readers--;
+		}
+
+		return {proxy, free};
+	}
+
+	getMut() {
+		if (this.readers > 0 || this.writers > 0) {
+			throw new Error('Already locked for reading or writing')
+		}
+
+		this.writers++;
+
+		const proxy = new Proxy(this, {
+			set: function (target, key, value) {
+				target[key] = value;
+				return true;
+			}
+		});
+
+		const free = () => {
+			this.writers--;
+		}
+
+		return {proxy, free};
+	}
+}
+
+const lock = new RWLock(1);
+
+const { proxy, free } = lock.get();
+
+console.log(proxy.value); // 1
+try {
+	proxy.value = 2; // Exception
+} catch (error) {
+	console.error(error.message); // Cannot modify value while reading
+}
+try {
+	lock.getMut(); // Exception - already locked for reading
+} catch (error) {
+	console.error(error.message); // Already locked for writing
+}
+
+free();
+
+const { proxy, free } = lock.getMut();
+
+proxy.value = proxy.value + 2;
+
+console.log(proxy.value); // 3
+
+try {
+	lock.get();             // Exception - уже есть пишущий
+} catch(e) {
+	console.error(e)
+}
