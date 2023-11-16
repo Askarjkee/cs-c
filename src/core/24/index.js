@@ -111,66 +111,60 @@ class RWLock {
 
 	get() {
 		if (this.writers > 0) {
-			throw new Error('Already locked writers bigger than 0');
+			throw new Error('Already locked for writing')
 		}
-
 		this.readers++;
-
 		const proxy = new Proxy(this, {
-			set: function (target, key, value) {
-				throw new Error('Cannot modify while reading')
+			set: () => {
+				return false;
 			}
-		});
+		})
 		const free = () => {
 			this.readers--;
 		}
-
-		return {proxy, free};
+		return {proxy, free}
 	}
 
 	getMut() {
-		if (this.readers > 0 || this.writers > 0) {
-			throw new Error('Already locked for reading or writing')
+		if (this.writers > 0 || this.readers > 0) {
+			throw new Error('Already locked for writing or reading');
 		}
-
 		this.writers++;
 
 		const proxy = new Proxy(this, {
-			set: function (target, key, value) {
-				target[key] = value;
+			set(target, key, newValue) {
+				target[key] = newValue;
 				return true;
 			}
 		});
-
 		const free = () => {
 			this.writers--;
 		}
-
-		return {proxy, free};
+		return {proxy, free}
 	}
 }
 
 const lock = new RWLock(1);
 
-const { proxy, free } = lock.get();
-
-console.log(proxy.value); // 1
-try {
-	proxy.value = 2; // Exception
-} catch (error) {
-	console.error(error.message); // Cannot modify value while reading
-}
-try {
-	lock.getMut(); // Exception - already locked for reading
-} catch (error) {
-	console.error(error.message); // Already locked for writing
-}
-
-free();
+// const { proxy, free } = lock.get();
+//
+// console.log(proxy.value); // 1
+// try {
+// 	proxy.value = 2; // Exception
+// } catch (error) {
+// 	console.error(error.message); // Cannot modify value while reading
+// }
+// try {
+// 	lock.getMut(); // Exception - already locked for reading
+// } catch (error) {
+// 	console.error(error.message); // Already locked for writing
+// }
+//
+// free();
 
 const { proxy, free } = lock.getMut();
 
-proxy.value = proxy.value + 2;
+proxy.value += + 2;
 
 console.log(proxy.value); // 3
 
